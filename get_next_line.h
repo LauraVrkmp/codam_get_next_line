@@ -6,7 +6,19 @@
 /*   By: laveerka <laveerka@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/10/19 20:06:43 by laveerka      #+#    #+#                 */
-/*   Updated: 2025/10/19 20:06:45 by laveerka      ########   odam.nl         */
+/*   Updated: 2025/11/02 09:20:08 by laveerka      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef GET_NEXT_LINE_H
+# define GET_NEXT_LINE_H
+
+# include <unistd.h>
+# include <fcntl.h>
+# include <stdio.h>
+
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 512
+# endif
+
+#endif
