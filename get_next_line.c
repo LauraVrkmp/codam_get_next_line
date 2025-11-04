@@ -6,15 +6,15 @@
 /*   By: laveerka <laveerka@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/10/19 20:06:50 by laveerka      #+#    #+#                 */
-/*   Updated: 2025/11/04 13:24:14 by laveerka      ########   odam.nl         */
+/*   Updated: 2025/11/04 13:54:04 by laveerka      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-static char	*read_line(char *stash, int fd, int factor, int *bytesRead)
+static char	*read_line(char *stash, int fd, int *bytesRead)
 {
-	*bytesRead = read(fd, stash, factor * BUFFER_SIZE);
+	*bytesRead = read(fd, stash, BUFFER_SIZE);
 	stash[*bytesRead] = '\0';
 	return (stash);
 }
@@ -54,10 +54,9 @@ char	*get_next_line(int fd)
 	static char	*stash;
 	char		*new_stash;
 	char		*line;
-	int			factor;
-	int			*bytesRead;
+	int			bytesRead;
+	int			stash_length;
 
-	factor = 1;
 	bytesRead = 0;
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
 		return (NULL);
@@ -66,12 +65,12 @@ char	*get_next_line(int fd)
 		stash = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 		if (stash == NULL)
 			return (NULL);
+		stash = read_line(stash, fd, &bytesRead);
 	}
-	stash = read_line(stash, fd, factor, bytesRead);
-	while (ft_strchri(stash, '\n') < 0 || ft_strchri(stash, '\0') != bytesRead)
+	stash_length = ft_strlen(stash);
+	while (ft_strchri(stash, '\n') < 0 || bytesRead != BUFFER_SIZE)
 	{
-		factor *= 2;
-		new_stash = malloc(sizeof(char) * (factor * BUFFER_SIZE + 1));
+		new_stash = malloc(sizeof(char) * (stash_length + BUFFER_SIZE + 1));
 		if (new_stash == NULL)
 		{
 			free(stash);
@@ -80,7 +79,7 @@ char	*get_next_line(int fd)
 		}
 		ft_strlcpy(new_stash, stash, ft_strlen(stash));
 		bytesRead = 0;
-		new_stash = read_line(new_stash + ft_strlen(stash), fd, factor, bytesRead);
+		new_stash = read_line(new_stash + ft_strlen(stash), fd, &bytesRead);
 		free(stash);
 		stash = new_stash;
 	}
