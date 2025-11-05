@@ -6,11 +6,28 @@
 /*   By: laveerka <laveerka@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/10/19 20:06:56 by laveerka      #+#    #+#                 */
-/*   Updated: 2025/11/04 12:43:23 by laveerka      ########   odam.nl         */
+/*   Updated: 2025/11/05 11:57:10 by laveerka      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+
+char	*ft_strjoin(const char *s1, const char *s2)
+{
+	char	*result;
+	char	*start;
+
+	result = malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
+	if (result == NULL)
+		return (NULL);
+	start = result;
+	while (*s1)
+		*result++ = *s1++;
+	while (*s2)
+		*result++ = *s2++;
+	*result = '\0';
+	return (start);
+}
 
 size_t	ft_strlcpy(char *dst, const char *src, size_t size)
 {
