@@ -6,7 +6,7 @@
 /*   By: laveerka <laveerka@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/10/19 20:06:50 by laveerka      #+#    #+#                 */
-/*   Updated: 2025/11/06 10:59:44 by laveerka      ########   odam.nl         */
+/*   Updated: 2025/11/07 13:01:01 by laveerka      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,19 +46,27 @@ static char	*read_line(char *stash, int fd, int *bytesRead)
 static char	*extract_line(char *stash)
 {
 	int		nl_loc;
+	int		nl_null;
 	char	*line;
 
+	if (stash == NULL)
+		return (NULL);
 	nl_loc = ft_strchri(stash, '\n');
 	if (nl_loc < 0)
+	{
 		nl_loc = ft_strchri(stash, '\0');
-	line = malloc(sizeof(char) * (nl_loc + 2));
+		nl_null = 1;
+	}
+	else
+		nl_null = 2;
+	line = malloc(sizeof(char) * (nl_loc + nl_null));
 	if (line == NULL)
 	{
 		free(stash);
 		stash = NULL;
 		return (NULL);
 	}
-	ft_strlcpy(line, stash, nl_loc + 2);
+	ft_strlcpy(line, stash, nl_loc + nl_null);
 	return (line);
 }
 
@@ -111,9 +119,13 @@ char	*get_next_line(int fd)
 		if (stash == NULL)
 			return (NULL);
 	}
-	//printf("stash: %s", stash);
 	line = extract_line(stash);
 	stash = next_line(stash);
+	if (stash == NULL && (line == NULL || line[0] == '\0'))
+	{
+		free(line);
+		return (NULL);
+	}
 	return (line);
 }
 
@@ -130,9 +142,10 @@ int	main(void)
 	line = get_next_line(fd);
 	while (line)
 	{
-		//printf("%s", line);
+		printf("%s", line);
 		free(line);
 		line = get_next_line(fd);
+		i++;
 	}
 	close(fd);
 	return (0);
