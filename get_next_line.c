@@ -6,7 +6,7 @@
 /*   By: laveerka <laveerka@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/10/19 20:06:50 by laveerka      #+#    #+#                 */
-/*   Updated: 2025/11/07 13:01:01 by laveerka      ########   odam.nl         */
+/*   Updated: 2025/11/08 09:42:18 by laveerka      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,32 +14,31 @@
 
 static char	*read_line(char *stash, int fd, int *bytesRead)
 {
-	int		stash_length;
 	char	*new_stash;
 	char	*temp;
 
-	stash_length = ft_strlen(stash);
-	if (stash_length == 0)
+	temp = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (temp == NULL)
 	{
-		*bytesRead = read(fd, stash, BUFFER_SIZE);
-		stash[*bytesRead] = '\0';
-	}
-	else
-	{
-		temp = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-		if (temp == NULL)
-		{
-			free(stash);
-			stash = NULL;
-			return (NULL);
-		}
-		*bytesRead = read(fd, temp, BUFFER_SIZE);
-		temp[*bytesRead] = '\0';
-		new_stash = ft_strjoin(stash, temp);
 		free(stash);
-		free(temp);
-		stash = new_stash;
+		stash = NULL;
+		return (NULL);
 	}
+	*bytesRead = read(fd, temp, BUFFER_SIZE);
+	if (*bytesRead < 0)
+	{
+		free(stash);
+		stash = NULL;
+		free(temp);
+		return (NULL);
+	}
+	temp[*bytesRead] = '\0';
+	new_stash = ft_strjoin(stash, temp);
+	free(stash);
+	free(temp);
+	if (new_stash == NULL)
+		return (NULL);
+	stash = new_stash;
 	return (stash);
 }
 
@@ -61,11 +60,7 @@ static char	*extract_line(char *stash)
 		nl_null = 2;
 	line = malloc(sizeof(char) * (nl_loc + nl_null));
 	if (line == NULL)
-	{
-		free(stash);
-		stash = NULL;
 		return (NULL);
-	}
 	ft_strlcpy(line, stash, nl_loc + nl_null);
 	return (line);
 }
@@ -105,7 +100,11 @@ char	*get_next_line(int fd)
 
 	bytesRead = BUFFER_SIZE;
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+	{
+		if (stash)
+			free(stash);
 		return (NULL);
+	}
 	if (stash == NULL)
 	{
 		stash = malloc(sizeof(char) * (BUFFER_SIZE + 1));
@@ -113,30 +112,39 @@ char	*get_next_line(int fd)
 			return (NULL);
 		stash[0] = '\0';
 	}
-	while (ft_strchri(stash, '\n') < 0 && bytesRead == BUFFER_SIZE)
+	while (bytesRead > 0)
 	{
 		stash = read_line(stash, fd, &bytesRead);
+		if (bytesRead < 0)
+		{
+			free(stash);
+			stash = NULL;
+			return (NULL);
+		}
 		if (stash == NULL)
 			return (NULL);
+		if (ft_strchri(stash, '\n') >= 0)
+			break ;
 	}
 	line = extract_line(stash);
 	stash = next_line(stash);
 	if (stash == NULL && (line == NULL || line[0] == '\0'))
 	{
-		free(line);
+		if (line)
+			free(line);
 		return (NULL);
 	}
 	return (line);
 }
 
-int	main(void)
+/* int	main(void)
 {
 	int		fd;
 	char	*line;
 	int		i;
 
 	i = 0;
-	fd = open("text_small.txt", O_RDONLY);
+	fd = open("text.txt", O_RDONLY);
 	if (fd < 0)
 		return (1);
 	line = get_next_line(fd);
@@ -149,4 +157,4 @@ int	main(void)
 	}
 	close(fd);
 	return (0);
-}
+} */

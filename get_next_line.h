@@ -6,7 +6,7 @@
 /*   By: laveerka <laveerka@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/10/19 20:06:43 by laveerka      #+#    #+#                 */
-/*   Updated: 2025/11/05 11:46:11 by laveerka      ########   odam.nl         */
+/*   Updated: 2025/11/08 07:41:37 by laveerka      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,5 +26,6 @@ char	*ft_strjoin(const char *s1, const char *s2);
 size_t	ft_strlcpy(char *dst, const char *src, size_t size);
 size_t	ft_strlen(const char *s);
 int		ft_strchri(const char *s, int c);
+char	*get_next_line(int fd);
 
 #endif
