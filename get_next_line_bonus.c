@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   get_next_line.c                                    :+:    :+:            */
+/*   get_next_line_bonus.c                              :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: laveerka <laveerka@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/10/19 20:06:50 by laveerka      #+#    #+#                 */
-/*   Updated: 2025/11/10 15:57:26 by laveerka      ########   odam.nl         */
+/*   Updated: 2025/11/10 15:53:51 by laveerka      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 static char	*read_line(char **stash, int fd, int *bytes_read)
 {
@@ -97,38 +97,38 @@ char	*extract_next(char **stash)
 
 char	*get_next_line(int fd)
 {
-	static char	*stash;
+	static char	*stash[MAX_FD];
 	char		*line;
 	int			bytes_read;
 
 	bytes_read = BUFFER_SIZE;
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	if (stash == NULL)
+	if (stash[fd] == NULL)
 	{
-		stash = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-		if (stash == NULL)
+		stash[fd] = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+		if (stash[fd] == NULL)
 			return (NULL);
-		stash[0] = '\0';
+		stash[fd][0] = '\0';
 	}
 	while (bytes_read > 0)
 	{
-		stash = read_line(&stash, fd, &bytes_read);
-		if (stash == NULL)
+		stash[fd] = read_line(&stash[fd], fd, &bytes_read);
+		if (stash[fd] == NULL)
 			return (NULL);
-		if (ft_strchri(stash, '\n') >= 0)
+		if (ft_strchri(stash[fd], '\n') >= 0)
 			break ;
 	}
-	line = extract_next(&stash);
+	line = extract_next(&stash[fd]);
 	return (line);
 }
 
-int	main(void)
+/* int	main(void)
 {
 	int		fd;
 	char	*line;
 
-	fd = open("giant_line.txt", O_RDONLY);
+	fd = open("text.txt", O_RDONLY);
 	if (fd < 0)
 		return (1);
 	line = get_next_line(fd);
@@ -140,4 +140,4 @@ int	main(void)
 	}
 	close(fd);
 	return (0);
-}
+} */
