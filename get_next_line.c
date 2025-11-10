@@ -6,7 +6,7 @@
 /*   By: laveerka <laveerka@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/10/19 20:06:50 by laveerka      #+#    #+#                 */
-/*   Updated: 2025/11/08 09:42:18 by laveerka      ########   odam.nl         */
+/*   Updated: 2025/11/10 10:29:25 by laveerka      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,8 @@ static char *next_line(char *stash)
 	nl_loc = ft_strchri(stash, '\n');
 	if (nl_loc < 0)
 	{
-		free(stash);
+		if (stash)
+			free(stash);
 		return (NULL);
 	}
 	nl_loc++;
@@ -83,12 +84,18 @@ static char *next_line(char *stash)
 	if (new == NULL)
 	{
 		free(stash);
+		stash = NULL;
 		return (NULL);
 	}
 	while (stash[nl_loc])
 		new[i++] = stash[nl_loc++];
 	new[i] = '\0';
 	free(stash);
+	if (new[0] == '\0')
+	{
+		free(new);
+		return (NULL);
+	}
 	return (new);
 }
 
@@ -99,7 +106,7 @@ char	*get_next_line(int fd)
 	int			bytesRead;
 
 	bytesRead = BUFFER_SIZE;
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+	if (fd < 0 || BUFFER_SIZE <= 0)
 	{
 		if (stash)
 			free(stash);
@@ -115,23 +122,34 @@ char	*get_next_line(int fd)
 	while (bytesRead > 0)
 	{
 		stash = read_line(stash, fd, &bytesRead);
-		if (bytesRead < 0)
-		{
-			free(stash);
-			stash = NULL;
-			return (NULL);
-		}
 		if (stash == NULL)
 			return (NULL);
-		if (ft_strchri(stash, '\n') >= 0)
+		if (bytesRead == 0 || ft_strchri(stash, '\n') >= 0)
 			break ;
 	}
 	line = extract_line(stash);
+	if (line == NULL)
+	{
+		if (stash)
+		{
+			free(stash);
+			stash = NULL;
+		}
+		return (NULL);
+	}
 	stash = next_line(stash);
+	if (stash && stash[0] == '\0')
+	{
+		free(stash);
+		stash = NULL;
+	}
 	if (stash == NULL && (line == NULL || line[0] == '\0'))
 	{
 		if (line)
+		{
 			free(line);
+			line = NULL;
+		}
 		return (NULL);
 	}
 	return (line);
