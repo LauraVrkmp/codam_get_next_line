@@ -6,40 +6,31 @@
 /*   By: laveerka <laveerka@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/10/19 20:06:50 by laveerka      #+#    #+#                 */
-/*   Updated: 2025/11/10 10:29:25 by laveerka      ########   odam.nl         */
+/*   Updated: 2025/11/10 15:44:53 by laveerka      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-static char	*read_line(char *stash, int fd, int *bytesRead)
+static char	*read_line(char **stash, int fd, int *bytes_read)
 {
 	char	*new_stash;
 	char	*temp;
 
 	temp = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (temp == NULL)
-	{
-		free(stash);
-		stash = NULL;
-		return (NULL);
-	}
-	*bytesRead = read(fd, temp, BUFFER_SIZE);
-	if (*bytesRead < 0)
-	{
-		free(stash);
-		stash = NULL;
-		free(temp);
-		return (NULL);
-	}
-	temp[*bytesRead] = '\0';
-	new_stash = ft_strjoin(stash, temp);
-	free(stash);
+		return (ft_free(stash, NULL, NULL));
+	*bytes_read = read(fd, temp, BUFFER_SIZE);
+	if (*bytes_read < 0)
+		return (ft_free(stash, NULL, temp));
+	temp[*bytes_read] = '\0';
+	new_stash = ft_strjoin(*stash, temp);
+	free(*stash);
 	free(temp);
 	if (new_stash == NULL)
 		return (NULL);
-	stash = new_stash;
-	return (stash);
+	*stash = new_stash;
+	return (*stash);
 }
 
 static char	*extract_line(char *stash)
@@ -65,32 +56,24 @@ static char	*extract_line(char *stash)
 	return (line);
 }
 
-static char *next_line(char *stash)
+static char	*next_line(char **stash)
 {
 	int		nl_loc;
 	char	*new;
 	int		i;
 
 	i = 0;
-	nl_loc = ft_strchri(stash, '\n');
+	nl_loc = ft_strchri(*stash, '\n');
 	if (nl_loc < 0)
-	{
-		if (stash)
-			free(stash);
-		return (NULL);
-	}
+		return (ft_free(stash, NULL, NULL));
 	nl_loc++;
-	new = malloc(sizeof(char) * (ft_strlen(stash + nl_loc) + 1));
+	new = malloc(sizeof(char) * (ft_strlen(*stash + nl_loc) + 1));
 	if (new == NULL)
-	{
-		free(stash);
-		stash = NULL;
-		return (NULL);
-	}
-	while (stash[nl_loc])
-		new[i++] = stash[nl_loc++];
+		return (ft_free(stash, NULL, NULL));
+	while ((*stash)[nl_loc])
+		new[i++] = (*stash)[nl_loc++];
 	new[i] = '\0';
-	free(stash);
+	free(*stash);
 	if (new[0] == '\0')
 	{
 		free(new);
@@ -99,19 +82,28 @@ static char *next_line(char *stash)
 	return (new);
 }
 
+char	*extract_next(char **stash)
+{
+	char	*line;
+
+	line = extract_line(*stash);
+	if (line == NULL)
+		return (ft_free(stash, NULL, NULL));
+	*stash = next_line(stash);
+	if (*stash == NULL && (line == NULL || line[0] == '\0'))
+		return (ft_free(NULL, line, NULL));
+	return (line);
+}
+
 char	*get_next_line(int fd)
 {
 	static char	*stash;
 	char		*line;
-	int			bytesRead;
+	int			bytes_read;
 
-	bytesRead = BUFFER_SIZE;
+	bytes_read = BUFFER_SIZE;
 	if (fd < 0 || BUFFER_SIZE <= 0)
-	{
-		if (stash)
-			free(stash);
 		return (NULL);
-	}
 	if (stash == NULL)
 	{
 		stash = malloc(sizeof(char) * (BUFFER_SIZE + 1));
@@ -119,39 +111,15 @@ char	*get_next_line(int fd)
 			return (NULL);
 		stash[0] = '\0';
 	}
-	while (bytesRead > 0)
+	while (bytes_read > 0)
 	{
-		stash = read_line(stash, fd, &bytesRead);
+		stash = read_line(&stash, fd, &bytes_read);
 		if (stash == NULL)
 			return (NULL);
-		if (bytesRead == 0 || ft_strchri(stash, '\n') >= 0)
+		if (ft_strchri(stash, '\n') >= 0)
 			break ;
 	}
-	line = extract_line(stash);
-	if (line == NULL)
-	{
-		if (stash)
-		{
-			free(stash);
-			stash = NULL;
-		}
-		return (NULL);
-	}
-	stash = next_line(stash);
-	if (stash && stash[0] == '\0')
-	{
-		free(stash);
-		stash = NULL;
-	}
-	if (stash == NULL && (line == NULL || line[0] == '\0'))
-	{
-		if (line)
-		{
-			free(line);
-			line = NULL;
-		}
-		return (NULL);
-	}
+	line = extract_next(&stash);
 	return (line);
 }
 

@@ -6,11 +6,25 @@
 /*   By: laveerka <laveerka@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/10/19 20:06:56 by laveerka      #+#    #+#                 */
-/*   Updated: 2025/11/05 11:57:10 by laveerka      ########   odam.nl         */
+/*   Updated: 2025/11/10 15:45:42 by laveerka      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+
+char	*ft_free(char **stash, char *line, char *temp)
+{
+	if (stash && *stash)
+	{
+		free(*stash);
+		*stash = NULL;
+	}
+	if (line)
+		free(line);
+	if (temp)
+		free(temp);
+	return (NULL);
+}
 
 char	*ft_strjoin(const char *s1, const char *s2)
 {
